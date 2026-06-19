@@ -1,0 +1,48 @@
+const express = require("express");
+const mongoose = require("mongoose");
+const cors = require("cors");
+
+const app = express();
+
+app.use(cors());
+app.use(express.json());
+
+// MongoDB Connection
+mongoose.connect("mongodb://127.0.0.1:27017/eventdb")
+.then(() => console.log("MongoDB Connected"))
+.catch(err => console.log(err));
+
+// Schema
+const eventSchema = new mongoose.Schema({
+    name: String,
+    eventName: String,
+    college: String
+});
+
+const Event = mongoose.model("Event", eventSchema);
+
+// Home Route
+app.get("/", (req, res) => {
+    res.send("Event Registration Backend Running");
+});
+
+// Register Participant
+app.post("/events", async (req, res) => {
+    const event = new Event(req.body);
+    await event.save();
+
+    res.json({
+        message: "Registration Successful",
+        data: event
+    });
+});
+
+// Fetch Participants
+app.get("/events", async (req, res) => {
+    const events = await Event.find();
+    res.json(events);
+});
+
+app.listen(5000, () => {
+    console.log("Server Running on Port 5000");
+});
